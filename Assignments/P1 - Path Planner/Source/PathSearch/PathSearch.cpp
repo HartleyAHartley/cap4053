@@ -17,25 +17,13 @@ namespace ufl_cap4053::searches{
 			stride = _tileMap->getColumnCount();
 			depth = _tileMap->getRowCount();
 			map = new vertex[stride*depth]();
-			bool* visited = new bool[stride*depth]();
-			std::cout << stride*depth << std::endl;
+			std::cerr << stride*depth << std::endl;
 
-			std::vector<const Tile*> queue;
-			queue.push_back(_tileMap->getTile(0,0));
-			while(!queue.empty()){
-				int position = queue.front()->getRow() * stride + queue.front()->getColumn();
-				std::cout << position << std::endl;
-				std::cout << queue.front()->getRow() << "," << queue.front()->getColumn() << std::endl;
-				
-				if(visited[position]){
-					queue.pop_back();
-					continue;
-				}
-				map[position].tile = queue.front();
-				map[position].weight = queue.front()->getWeight();
-				visited[position] = true;
-				for(const auto& [vertex,_]: queue.front()->getLines()){
-					queue.push_back(vertex);
+			for (int row = 0; row < depth; row++) {
+				for (int column = 0; column < stride; column++) {
+					int position = row * stride + column;
+					map[position].tile = _tileMap->getTile(row, column);
+					map[position].weight = map[position].tile->getWeight();
 				}
 			}
 		}
