@@ -12,7 +12,7 @@ sudo mount msincludes.img ~/msincludes
 
 After that your msincludes folder should look like this (folder names with numbers might vary slightly):
 ./msvc
-./msvc/14.24.28314
+./msvc/14.28.29333
 ./10sdk
 ./10sdk/App Certification Kit
 ./10sdk/bin
