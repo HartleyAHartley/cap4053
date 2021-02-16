@@ -1,16 +1,18 @@
 #pragma once
-#define DLLEXPORT __declspec(dllexport)
 #ifdef max
 #undef max // I want to use std::max
 #define resetmax
 #endif
 
+#include <stdint.h>
+#include "../platform.h"
 #include "../Framework/TileSystem/TileMap.h"
+#include "../Framework/TileSystem/Tile.h"
 
 namespace ufl_cap4053::searches{
-	class DLLEXPORT PathSearch{
+	class DLLEXPORT PathSearch {
 	public:
-		PathSearch();
+		 PathSearch();
 		~PathSearch();
 		auto load(TileMap* _tileMap) -> void;
 		auto initialize(int startRow, int startCol, int goalRow, int goalCol) -> void;
@@ -19,6 +21,15 @@ namespace ufl_cap4053::searches{
 		auto unload() -> void;
 		auto isDone() const -> bool;
 		auto getSolution() const -> std::vector<Tile const*> const;
+
+	private:
+		struct vertex{
+			uint8_t weight = 0;
+			const Tile* tile = nullptr;
+		};
+		vertex* map;
+		int stride = 0;
+		int depth = 0;
 	};
 }
 
