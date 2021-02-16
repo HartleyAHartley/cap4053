@@ -1,14 +1,28 @@
-#include "../platform.h" // This file will make exporting DLL symbols simpler for students.
+#pragma once
+#define DLLEXPORT __declspec(dllexport)
+#ifdef max
+#undef max // I want to use std::max
+#define resetmax
+#endif
 
-namespace ufl_cap4053
-{
-	namespace searches
-	{
-		class PathSearch
-		{
-		// CLASS DECLARATION GOES HERE
-			public:
-				DLLEXPORT PathSearch(); // EX: DLLEXPORT required for public methods - see platform.h
-		};
-	}
-}  // close namespace ufl_cap4053::searches
+#include "../Framework/TileSystem/TileMap.h"
+
+namespace ufl_cap4053::searches{
+	class DLLEXPORT PathSearch{
+	public:
+		PathSearch();
+		~PathSearch();
+		auto load(TileMap* _tileMap) -> void;
+		auto initialize(int startRow, int startCol, int goalRow, int goalCol) -> void;
+		auto update(long timeslice) -> void;
+		auto shutdown() -> void;
+		auto unload() -> void;
+		auto isDone() const -> bool;
+		auto getSolution() const -> std::vector<Tile const*> const;
+	};
+}
+
+#ifdef resetmax
+#define max(a ,b) (((a) > (b)) ? (a) : (b)) // put it back for safety
+#undef resetmax
+#endif

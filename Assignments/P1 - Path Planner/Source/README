@@ -1,0 +1,38 @@
+1. Install clang and lld (Make sure clang-cl and lld-link are commands on your system) and wine
+
+2. Run these commands (probably best to do this in your home directory):
+dd if=/dev/zero of=msincludes.img bs=1024 count=$((1024 * 1024 * 4))
+mkfs.exfat msincludes.img
+mkdir ~/msincludes
+sudo mount msincludes.img ~/msincludes
+
+3. Get a copy of C:\Program Files (x86)\Windows Kits\10\ from a Windows machine with VS installed, put it in ~/msincludes/10sdk
+
+4. Get a copy of C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\ and put it in ~/msincludes/msvc
+
+After that your msincludes folder should look like this (folder names with numbers might vary slightly):
+./msvc
+./msvc/14.24.28314
+./10sdk
+./10sdk/App Certification Kit
+./10sdk/bin
+./10sdk/Catalogs
+./10sdk/DesignTime
+./10sdk/Extension SDKs
+./10sdk/Include
+./10sdk/Lib
+./10sdk/Licenses
+./10sdk/Platforms
+./10sdk/Redist
+./10sdk/References
+./10sdk/Remote
+./10sdk/SDKManifest.xml
+./10sdk/Shortcuts
+./10sdk/Source
+./10sdk/Testing
+./10sdk/UnionMetadata
+
+5. `make`, `make run`, or `make clean`
+(For reasons I don't fully understand rarely it will just break and need a clean)
+
+Every time you reboot you will need to `sudo mount msincludes.img ~/msincludes` again
