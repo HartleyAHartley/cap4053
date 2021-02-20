@@ -36,7 +36,8 @@ namespace ufl_cap4053::searches{
 			stride = _tileMap->getColumnCount();
 			depth = _tileMap->getRowCount();
 			map = new vertex[stride*depth]();
-			std::cout << stride*depth << std::endl;
+
+			tileDist = _tileMap->getTile(0, 1)->getXCoordinate() - _tileMap->getTile(0, 0)->getXCoordinate();
 
 			for (int row = 0; row < depth; row++) {
 				for (int column = 0; column < stride; column++) {
@@ -54,6 +55,7 @@ namespace ufl_cap4053::searches{
 			startCol = _startCol;
 			goalRow = _goalRow;
 			goalCol = _goalCol;
+			complete = false;
 
 			int size = stride*depth;
 			openSet.reserve(size);
@@ -61,8 +63,8 @@ namespace ufl_cap4053::searches{
 			std::fill_n(inOpenSet,size,false);
 
 			uint32_t startPos = startRow * stride + startCol;
-			goalX = map[startPos].tile->getXCoordinate();
-			goalY = map[startPos].tile->getYCoordinate();
+			goalX = map[goalRow * stride + goalCol].tile->getXCoordinate();
+			goalY = map[goalRow * stride + goalCol].tile->getYCoordinate();
 
 			openSet.push_back(startPos);
 			
@@ -79,17 +81,23 @@ namespace ufl_cap4053::searches{
 		}
 
 		auto PathSearch::update(long timeslice) -> void{
-			std::thread t1(timelimit, timeslice);
+			halt = false;
+			std::thread t1(&PathSearch::timelimit, this, timeslice);
 			do{
+
+				std::pop_heap(openSet.begin(), openSet.end(), [this](const auto& lhs, const auto& rhs) {
+					return fScore[lhs] > fScore[rhs];
+				});
 				uint32_t current = openSet.back();
+				openSet.pop_back();
+
 				if(current == (goalRow * stride + goalCol)){
 					complete = true;
 					break;
 				}
-				std::pop_heap(openSet.begin(),openSet.end(),[this](const auto& lhs, const auto& rhs){
-					return fScore[lhs] < fScore[rhs];
-				});
+
 				inOpenSet[current] = false;
+				map[current].tile->setFill(0xffad6b9f);
 				for(int i = 0; i < 6; i++){
 					if(map[current].weight == 0){
 						continue;
@@ -97,43 +105,54 @@ namespace ufl_cap4053::searches{
 					uint32_t neighbor;
 					int row = (current-(current%stride))/stride;
 					int col = current%stride;
-					if(((current-(current%stride))/stride) % 2 == 0){
-						//even
+					if(((current-(current%stride))/stride) % 2 == 0){ //even
+						if (row + evenRowOffsets[i] < 0 || col + evenColOffsets[i] < 0 || row + evenRowOffsets[i] >= depth || col + evenColOffsets[i] >= stride) {
+							continue;
+						}
 					 	neighbor = (row+evenRowOffsets[i]) * stride + (col+evenColOffsets[i]);
-					}else{
-						//odd
+					}else{ //odd
+						if (row + oddRowOffsets[i] < 0 || col + oddColOffsets[i] < 0 || row + oddRowOffsets[i] >= depth || col + oddColOffsets[i] >= stride) {
+							continue;
+						}
 						neighbor = (row+oddRowOffsets[i]) * stride + (col+oddColOffsets[i]);
 					}
+					if (neighbor >= stride * depth || map[neighbor].weight == 0) {
+						continue;
+					}
 
-					double tentativegScore = gScore[current] + map[neighbor].weight;
+					
+					double tentativegScore = gScore[current] + tileDist*(map[current].weight + map[neighbor].weight)/2.;
 					if(tentativegScore < gScore[neighbor]){
 						cameFrom[neighbor] = current;
 						gScore[neighbor] = tentativegScore;
-						fScore[neighbor] = gScore[neighbor] + heuristic(map[neighbor].x,map[neighbor].y);
+						fScore[neighbor] = gScore[neighbor] + 1.20 * heuristic(map[neighbor].x,map[neighbor].y);
 						if(!inOpenSet[neighbor]){
+							map[neighbor].tile->setFill(0xff6430c7);
 							openSet.push_back(neighbor);
-							inOpenSet[neighbor] = true;
-							std::push_heap(openSet.begin(),openSet.end(),[this](const auto& lhs, const auto& rhs){
-								return fScore[lhs] < fScore[rhs];
+							std::push_heap(openSet.begin(), openSet.end(), [this](const auto& lhs, const auto& rhs) {
+								return fScore[lhs] > fScore[rhs];
 							});
+							inOpenSet[neighbor] = true;
 						}
 					}
 				}
-			}while(!openSet.empty() && !t1.joinable());
+			}while(!openSet.empty() && !halt && timeslice != 0);
 
-			if(complete){
+			if(complete || timeslice == 0){
 				t1.detach();
 			}else{
 				if(openSet.empty()){
 					std::cerr << "err" << std::endl;
+					complete = true;
 				}
-				complete = true;
+				t1.join();
 			}
 
 		}
 
 		auto PathSearch::timelimit(long timeslice) -> void{
 			std::this_thread::sleep_for(std::chrono::milliseconds(timeslice));
+			halt = true;
 		}
 
 		auto PathSearch::shutdown() -> void{
@@ -154,11 +173,6 @@ namespace ufl_cap4053::searches{
 				inOpenSet = nullptr;
 			}
 			openSet.clear();
-			startRow = 0;
-			startCol = 0;
-			goalRow = 0;
-			goalCol = 0;
-			complete = false;
 		}
 
 		auto PathSearch::unload() -> void{
@@ -166,8 +180,6 @@ namespace ufl_cap4053::searches{
 			if(map){
 				delete[] map;
 				map = nullptr;
-				stride = 0;
-				depth = 0;
 			}
 		}
 
@@ -179,11 +191,14 @@ namespace ufl_cap4053::searches{
 			std::vector<Tile const*> path;
 			int current = goalRow * stride + goalCol;
 			path.push_back(map[current].tile);
+			map[current].tile->setFill(0xffff0000);
 			while(cameFrom[current] != static_cast<uint32_t>(-1)){
+				map[current].tile->addLineTo(map[cameFrom[current]].tile, 0x00);
 				current = cameFrom[current];
-				path.insert(path.begin(),map[current].tile);
+				path.push_back(map[current].tile);
 			}
-			return {};
+			map[current].tile->setFill(0xff008000);
+			return path;
 		}
 
 		auto PathSearch::heuristic(double x, double y) const -> double {

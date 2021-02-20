@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <atomic>
 #include "../platform.h"
 #include "../Framework/TileSystem/TileMap.h"
 #include "../Framework/TileSystem/Tile.h"
@@ -28,7 +29,7 @@ namespace ufl_cap4053::searches{
 			uint32_t weight = 0;
 			double x = 0;
 			double y = 0;
-			const Tile* tile = nullptr;
+			Tile* tile = nullptr;
 		};
 		vertex* map = nullptr;
 		int stride = 0;
@@ -40,13 +41,15 @@ namespace ufl_cap4053::searches{
 		int goalCol = 0;
 		double goalX = 0.0;
 		double goalY = 0.0;
+		double tileDist = 0.0;
 
 		std::vector<uint32_t> openSet{};
 		bool* inOpenSet = nullptr;
 		uint32_t* cameFrom = nullptr;
 		double* gScore = nullptr;
 		double* fScore = nullptr;
-		bool complete = false;
+		bool complete = true;
+		std::atomic<bool> halt = true;
 
 		const int oddColOffsets[6]  = { 0, 1, 1, 1, 0,-1};
 		const int oddRowOffsets[6]  = {-1,-1, 0, 1, 1, 0};
@@ -54,7 +57,7 @@ namespace ufl_cap4053::searches{
 		const int evenRowOffsets[6] = {-1,-1, 0, 1, 1, 0};
 
 		auto heuristic(double x, double y) const -> double;
-		static auto timelimit(long timeslice) -> void;
+		auto timelimit(long timeslice) -> void;
 	};
 }
 
