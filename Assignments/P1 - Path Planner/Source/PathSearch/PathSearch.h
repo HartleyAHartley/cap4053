@@ -27,10 +27,9 @@ namespace ufl_cap4053::searches{
 	private:
 		struct vertex{
 			uint32_t weight = 0;
-			double x = 0;
-			double y = 0;
-			uint32_t row = 0;
-			uint32_t col = 0;
+			int x = 0;
+			int y = 0;
+			int z = 0;
 			Tile* tile = nullptr;
 		};
 		vertex* map = nullptr;
@@ -41,24 +40,29 @@ namespace ufl_cap4053::searches{
 		int startCol = 0;
 		int goalRow = 0;
 		int goalCol = 0;
-		double goalX = 0.0;
-		double goalY = 0.0;
-		double tileDist = 0.0;
+		int goalX = 0;
+		int goalY = 0;
+		int goalZ = 0;
 
 		std::vector<uint32_t> openSet{};
 		bool* inOpenSet = nullptr;
 		uint32_t* cameFrom = nullptr;
-		double* gScore = nullptr;
-		double* fScore = nullptr;
+		int* gScore = nullptr;
+		int* fScore = nullptr;
 		bool complete = true;
-		std::atomic<bool> halt = true;
+		std::atomic<bool> halt;
 
-		const int oddColOffsets[6]  = { 0, 1, 1, 1, 0,-1};
-		const int oddRowOffsets[6]  = {-1,-1, 0, 1, 1, 0};
-		const int evenColOffsets[6] = {-1, 0, 1, 0,-1,-1};
-		const int evenRowOffsets[6] = {-1,-1, 0, 1, 1, 0};
+		struct xyz {
+			int x;
+			int y;
+			int z;
+		};
+		const xyz cubeDirs[6] = {
+			{ 1,-1, 0}, { 1, 0,-1}, { 0, 1,-1}, 
+    	{-1, 1, 0}, {-1, 0,+1}, { 0,-1, 1}
+		};
 
-		auto heuristic(double x, double y) const -> double;
+		auto heuristic(int x, int y, int z) const -> int;
 		auto timelimit(long timeslice) -> void;
 	};
 }
