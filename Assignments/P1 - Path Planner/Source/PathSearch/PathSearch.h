@@ -29,6 +29,8 @@ namespace ufl_cap4053::searches{
 			uint32_t weight = 0;
 			double x = 0;
 			double y = 0;
+			uint32_t row = 0;
+			uint32_t col = 0;
 			Tile* tile = nullptr;
 		};
 		vertex* map = nullptr;

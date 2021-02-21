@@ -46,6 +46,8 @@ namespace ufl_cap4053::searches{
 					map[position].weight = map[position].tile->getWeight();
 					map[position].x = map[position].tile->getXCoordinate();
 					map[position].y = map[position].tile->getYCoordinate();
+					map[position].row = row;
+					map[position].col = column;
 				}
 			}
 		}
@@ -82,9 +84,10 @@ namespace ufl_cap4053::searches{
 
 		auto PathSearch::update(long timeslice) -> void{
 			halt = false;
-			std::thread t1(&PathSearch::timelimit, this, timeslice);
 			do{
-
+				std::push_heap(openSet.begin(), openSet.end(), [this](const auto& lhs, const auto& rhs) {
+					return fScore[lhs] > fScore[rhs];
+				});
 				std::pop_heap(openSet.begin(), openSet.end(), [this](const auto& lhs, const auto& rhs) {
 					return fScore[lhs] > fScore[rhs];
 				});
@@ -103,9 +106,9 @@ namespace ufl_cap4053::searches{
 						continue;
 					}
 					uint32_t neighbor;
-					int row = (current-(current%stride))/stride;
-					int col = current%stride;
-					if(((current-(current%stride))/stride) % 2 == 0){ //even
+					int row = map[current].row;
+					int col = map[current].col;
+					if(row % 2 == 0){ //even
 						if (row + evenRowOffsets[i] < 0 || col + evenColOffsets[i] < 0 || row + evenRowOffsets[i] >= depth || col + evenColOffsets[i] >= stride) {
 							continue;
 						}
@@ -129,23 +132,20 @@ namespace ufl_cap4053::searches{
 						if(!inOpenSet[neighbor]){
 							map[neighbor].tile->setFill(0xff6430c7);
 							openSet.push_back(neighbor);
-							std::push_heap(openSet.begin(), openSet.end(), [this](const auto& lhs, const auto& rhs) {
-								return fScore[lhs] > fScore[rhs];
-							});
 							inOpenSet[neighbor] = true;
 						}
 					}
 				}
-			}while(!openSet.empty() && !halt && timeslice != 0);
+			}while(!complete && !halt && timeslice != 0 && !openSet.empty());
 
 			if(complete || timeslice == 0){
-				t1.detach();
+				//t1.detach();
 			}else{
 				if(openSet.empty()){
 					std::cerr << "err" << std::endl;
 					complete = true;
 				}
-				t1.join();
+				//t1.join();
 			}
 
 		}
