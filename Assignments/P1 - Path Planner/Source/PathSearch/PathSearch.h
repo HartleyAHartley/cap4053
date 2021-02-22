@@ -6,7 +6,7 @@
 
 #include <cstdint>
 #include <vector>
-#include <atomic>
+#include <cmath>
 #include "../platform.h"
 #include "../Framework/TileSystem/TileMap.h"
 #include "../Framework/TileSystem/Tile.h"
@@ -50,7 +50,6 @@ namespace ufl_cap4053::searches{
 		int* gScore = nullptr;
 		int* fScore = nullptr;
 		bool complete = true;
-		std::atomic<bool> halt;
 
 		struct xyz {
 			int x;
@@ -62,8 +61,9 @@ namespace ufl_cap4053::searches{
     	{-1, 1, 0}, {-1, 0,+1}, { 0,-1, 1}
 		};
 
-		auto heuristic(int x, int y, int z) const -> int;
-		auto timelimit(long timeslice) -> void;
+		inline auto heuristic(int x, int y, int z) const -> int {
+			return (abs(goalX - x) + abs(goalY - y) + abs(goalZ - z)) >> 1;
+		}
 	};
 }
 

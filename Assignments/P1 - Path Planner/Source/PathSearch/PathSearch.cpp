@@ -33,16 +33,19 @@ namespace ufl_cap4053::searches{
 		}
 
 		auto PathSearch::load(TileMap* _tileMap) -> void{
-			stride = _tileMap->getColumnCount();
-			depth = _tileMap->getRowCount();
-			map = new vertex[stride*depth]();
+			stride = _tileMap->getColumnCount()+2;
+			depth = _tileMap->getRowCount()+2;
+			map = new vertex[(stride)*(depth)]();
 
 			for (int row = 0; row < depth; row++) {
 				for (int col = 0; col < stride; col++) {
 					int position = row * stride + col;
-					map[position].tile = _tileMap->getTile(row, col);
+					if (row == 0 || row == (depth-1) || col == 0 || col == (stride-1)) {
+						continue;
+					}
+					map[position].tile = _tileMap->getTile(row-1, col-1);
 					map[position].weight = map[position].tile->getWeight();
-					map[position].x = col - ((row - (row&1))>>1);
+					map[position].x = col - ((row + (row&1))>>1);
 					map[position].z = row;
 					map[position].y	= -map[position].x-map[position].z;
 				}
@@ -50,10 +53,10 @@ namespace ufl_cap4053::searches{
 		}
 
 		auto PathSearch::initialize(int _startRow, int _startCol, int _goalRow, int _goalCol) -> void{
-			startRow = _startRow;
-			startCol = _startCol;
-			goalRow = _goalRow;
-			goalCol = _goalCol;
+			startRow = _startRow+1;
+			startCol = _startCol+1;
+			goalRow = _goalRow+1;
+			goalCol = _goalCol+1;
 			complete = false;
 
 			int size = stride*depth;
@@ -62,7 +65,7 @@ namespace ufl_cap4053::searches{
 			std::fill_n(inOpenSet,size,false);
 
 			uint32_t startPos = startRow * stride + startCol;
-			goalX = goalCol - ((goalRow - (goalRow&1))>>1);
+			goalX = goalCol - ((goalRow + (goalRow&1))>>1);
 			goalZ = goalRow;
 			goalY = -goalX-goalZ;
 
@@ -81,7 +84,15 @@ namespace ufl_cap4053::searches{
 		}
 
 		auto PathSearch::update(long timeslice) -> void{
-			halt = false;
+			
+			bool halt = false;
+			if (timeslice == 0) {
+				halt = true;
+			}
+			//std::thread t1 = std::thread([&halt](long timeslice) {
+			//		std::this_thread::sleep_for(std::chrono::milliseconds(timeslice));
+			//		halt = true;
+			//}, timeslice);
 			do{
 				std::pop_heap(openSet.begin(), openSet.end(), [this](const auto& lhs, const auto& rhs) {
 					return fScore[lhs] > fScore[rhs];
@@ -100,13 +111,10 @@ namespace ufl_cap4053::searches{
 					uint32_t neighbor;
 					int neighborX = map[current].x + cubeDirs[i].x;
 					int neighborZ = map[current].z + cubeDirs[i].z;
-					int neighborCol = neighborX + (neighborZ - (neighborZ&1) >>1);
+					int neighborCol = neighborX + (neighborZ + (neighborZ&1) >>1);
 					int neighborRow = neighborZ;
-					if(neighborRow >= depth || neighborRow < 0 || neighborCol < 0 || neighborCol >= stride){
-						continue;
-					}
 					neighbor = neighborRow * stride + neighborCol;
-					if(neighbor >= stride*depth || neighbor < 0 || map[neighbor].weight == 0){
+					if(map[neighbor].weight == 0){
 						continue;
 					}
 
@@ -123,25 +131,15 @@ namespace ufl_cap4053::searches{
 						}
 					}
 				}
-			}while(!complete && !halt && timeslice != 0 && !openSet.empty());
+			}while(!complete && !halt && !openSet.empty());
 
-			if(complete || timeslice == 0){
-				//t1.detach();
-			}else{
-				
-				//t1.join();
-			}
+			//t1.detach();
 
 			if(!complete && openSet.empty()){
 				std::cerr << "err" << std::endl;
 				complete = true;
 			}
 
-		}
-
-		auto PathSearch::timelimit(long timeslice) -> void{
-			std::this_thread::sleep_for(std::chrono::milliseconds(timeslice));
-			halt = true;
 		}
 
 		auto PathSearch::shutdown() -> void{
@@ -185,9 +183,5 @@ namespace ufl_cap4053::searches{
 				path.push_back(map[current].tile);
 			}
 			return path;
-		}
-
-		auto PathSearch::heuristic(int x, int y, int z) const -> int {
-			return (abs(goalX - x) + abs(goalY - y) + abs(goalZ - z))>>1;
 		}
 }
