@@ -50,6 +50,7 @@ namespace ufl_cap4053::searches{
 					map[position].y	= -map[position].x-map[position].z;
 				}
 			}
+			dist = _tileMap->getTile(0,1)->getXCoordinate() - _tileMap->getTile(0,0)->getXCoordinate();
 		}
 
 		auto PathSearch::initialize(int _startRow, int _startCol, int _goalRow, int _goalCol) -> void{
@@ -84,15 +85,12 @@ namespace ufl_cap4053::searches{
 		}
 
 		auto PathSearch::update(long timeslice) -> void{
-			
-			bool halt = false;
-			if (timeslice == 0) {
-				halt = true;
-			}
-			//std::thread t1 = std::thread([&halt](long timeslice) {
-			//		std::this_thread::sleep_for(std::chrono::milliseconds(timeslice));
-			//		halt = true;
-			//}, timeslice);
+			typedef std::chrono::high_resolution_clock Time;
+			typedef std::chrono::milliseconds ms;
+			typedef std::chrono::duration<float> fsec;
+			auto t0 = Time::now();
+			auto t1 = Time::now();
+			ms d;
 			do{
 				std::pop_heap(openSet.begin(), openSet.end(), [this](const auto& lhs, const auto& rhs) {
 					return fScore[lhs] > fScore[rhs];
@@ -119,11 +117,11 @@ namespace ufl_cap4053::searches{
 					}
 
 					
-					double tentativegScore = gScore[current] + map[neighbor].weight;
+					double tentativegScore = gScore[current] + map[current].weight + map[neighbor].weight;
 					if(tentativegScore < gScore[neighbor]){
 						cameFrom[neighbor] = current;
 						gScore[neighbor] = tentativegScore;
-						fScore[neighbor] = gScore[neighbor] + 1 * heuristic(map[neighbor].x,map[neighbor].y, map[neighbor].z);
+						fScore[neighbor] = gScore[neighbor] + 1.6 * heuristic(map[neighbor].x,map[neighbor].y, map[neighbor].z);
 						if(!inOpenSet[neighbor]){
 							map[neighbor].tile->setFill(0xff6430c7);
 							openSet.push_back(neighbor);
@@ -131,9 +129,8 @@ namespace ufl_cap4053::searches{
 						}
 					}
 				}
-			}while(!complete && !halt && !openSet.empty());
-
-			//t1.detach();
+				t1 = Time::now();
+			}while(!complete && std::chrono::duration_cast<ms>(t1-t0).count() < timeslice && !openSet.empty());
 
 			if(!complete && openSet.empty()){
 				std::cerr << "err" << std::endl;
@@ -178,10 +175,14 @@ namespace ufl_cap4053::searches{
 			std::vector<Tile const*> path;
 			int current = goalRow * stride + goalCol;
 			path.push_back(map[current].tile);
+			// float cost = map[current].weight * (dist/2);
 			while(cameFrom[current] != static_cast<uint32_t>(-1)){
 				current = cameFrom[current];
 				path.push_back(map[current].tile);
+				// cost += map[current].weight * dist;
 			}
+			// cost -= map[current].weight * (dist/2);
+			// std::cout << cost << std::endl;
 			return path;
 		}
 }

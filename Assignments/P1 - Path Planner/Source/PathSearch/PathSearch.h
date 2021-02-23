@@ -44,6 +44,8 @@ namespace ufl_cap4053::searches{
 		int goalY = 0;
 		int goalZ = 0;
 
+		double dist = 0;
+
 		std::vector<uint32_t> openSet{};
 		bool* inOpenSet = nullptr;
 		uint32_t* cameFrom = nullptr;
