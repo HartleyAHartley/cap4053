@@ -104,7 +104,7 @@ namespace ufl_cap4053::searches{
 					break;
 				}
 				inOpenSet[current] = false;
-				map[current].tile->setFill(0xffad6b9f);
+				// map[current].tile->setFill(0xffad6b9f);
 				for(int i = 0; i < 6; i++){
 					uint32_t neighbor;
 					int neighborX = map[current].x + cubeDirs[i].x;
@@ -118,16 +118,21 @@ namespace ufl_cap4053::searches{
 
 					
 					double tentativegScore = gScore[current] + map[neighbor].weight;
-					if(tentativegScore < gScore[neighbor]){
-						cameFrom[neighbor] = current;
-						gScore[neighbor] = tentativegScore;
-						fScore[neighbor] = gScore[neighbor] + heuristic(map[neighbor].x,map[neighbor].y, map[neighbor].z);
-						if(!inOpenSet[neighbor]){
-							map[neighbor].tile->setFill(0xff6430c7);
-							openSet.push_back(neighbor);
-							inOpenSet[neighbor] = true;
-						}
+					if(tentativegScore >= gScore[neighbor]){
+						continue;
 					}
+
+					cameFrom[neighbor] = current;
+					gScore[neighbor] = tentativegScore;
+					fScore[neighbor] = gScore[neighbor] + heuristic(map[neighbor].x,map[neighbor].y, map[neighbor].z);
+
+					if(inOpenSet[neighbor]){
+						continue;
+					}
+
+					// map[neighbor].tile->setFill(0xff6430c7);
+					openSet.push_back(neighbor);
+					inOpenSet[neighbor] = true;
 				}
 				t1 = Time::now();
 			}while(!complete && std::chrono::duration_cast<ms>(t1-t0).count() < timeslice && !openSet.empty());
