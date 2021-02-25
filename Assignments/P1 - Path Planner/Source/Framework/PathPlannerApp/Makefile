@@ -8,7 +8,7 @@ UCRT_LIB = $(HOME)/msincludes/10sdk/Lib/10.0.18362.0/ucrt/x64/
 UM_LIB = $(HOME)/msincludes/10sdk/Lib/10.0.18362.0/um/x64/
 
 OBJ = PathPlannerLab.obj
-DEPENDS = PathPlannerLab.h PathPlannerUtility.h stdafx.h Resource/resource.h
+DEPENDS = PathPlannerLab.h stdafx.h Resource/resource.h
 OUT = PathPlannerApp
 
 $(OUT).exe: $(OBJ) Resource/PathPlanner.res ../TileSystem/TileSystem.lib ../../PathSearch/PathSearch.lib $(UM_LIB)/gdi32.lib $(UM_LIB)/user32.lib $(UM_LIB)/comctl32.lib $(UM_LIB)/comdlg32.lib

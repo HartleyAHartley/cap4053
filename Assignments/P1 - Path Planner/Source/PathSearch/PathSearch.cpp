@@ -117,11 +117,11 @@ namespace ufl_cap4053::searches{
 					}
 
 					
-					double tentativegScore = gScore[current] + map[current].weight + map[neighbor].weight;
+					double tentativegScore = gScore[current] + map[neighbor].weight;
 					if(tentativegScore < gScore[neighbor]){
 						cameFrom[neighbor] = current;
 						gScore[neighbor] = tentativegScore;
-						fScore[neighbor] = gScore[neighbor] + 1.6 * heuristic(map[neighbor].x,map[neighbor].y, map[neighbor].z);
+						fScore[neighbor] = gScore[neighbor] + heuristic(map[neighbor].x,map[neighbor].y, map[neighbor].z);
 						if(!inOpenSet[neighbor]){
 							map[neighbor].tile->setFill(0xff6430c7);
 							openSet.push_back(neighbor);
@@ -175,13 +175,13 @@ namespace ufl_cap4053::searches{
 			std::vector<Tile const*> path;
 			int current = goalRow * stride + goalCol;
 			path.push_back(map[current].tile);
-			// float cost = map[current].weight * (dist/2);
+			// float cost = map[current].weight * dist;
 			while(cameFrom[current] != static_cast<uint32_t>(-1)){
 				current = cameFrom[current];
 				path.push_back(map[current].tile);
 				// cost += map[current].weight * dist;
 			}
-			// cost -= map[current].weight * (dist/2);
+			// cost -= map[current].weight * dist;
 			// std::cout << cost << std::endl;
 			return path;
 		}
