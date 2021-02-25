@@ -7,12 +7,11 @@
 #include <cstdint>
 #include <vector>
 #include <cmath>
-#include "../platform.h"
-#include "../Framework/TileSystem/TileMap.h"
-#include "../Framework/TileSystem/Tile.h"
+#include "TileMap.h"
+#include "Tile.h"
 
 namespace ufl_cap4053::searches{
-	class DLLEXPORT PathSearch {
+	class PathSearch {
 	public:
 		 PathSearch();
 		~PathSearch();
@@ -47,12 +46,12 @@ namespace ufl_cap4053::searches{
 		double dist = 0;
 
 		std::vector<uint32_t> openSet{};
+		size_t openSetSize = 0;
 		bool* inOpenSet = nullptr;
 		uint32_t* cameFrom = nullptr;
 		int* gScore = nullptr;
 		int* fScore = nullptr;
 		bool complete = true;
-		size_t openSetSize = 0;
 
 		struct xyz {
 			int x;

@@ -11,7 +11,7 @@ run: default
 	wine out/PathPlannerApp.exe
 
 profile: default
-	valgrind --trace-children=yes --vex-iropt-register-updates=allregs-at-mem-access --partial-loads-ok=yes wine out/PathPlannerApp.exe
+	valgrind --trace-children=yes --vex-iropt-register-updates=allregs-at-mem-access --partial-loads-ok=yes wine64 out/PathPlannerApp.exe
 
 clean:
 	$(MAKE) -C Framework/TileSystem/ clean
