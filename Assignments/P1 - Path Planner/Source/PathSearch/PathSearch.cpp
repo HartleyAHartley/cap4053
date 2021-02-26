@@ -35,7 +35,7 @@ namespace ufl_cap4053::searches{
 		auto PathSearch::load(TileMap* _tileMap) -> void{
 			stride = _tileMap->getColumnCount()+2;
 			depth = _tileMap->getRowCount()+2;
-			map = new vertex[(stride)*(depth)]();
+			map = new vertex[static_cast<int64_t>(stride)* static_cast<int64_t>(depth)]();
 
 			for (int row = 0; row < depth; row++) {
 				for (int col = 0; col < stride; col++) {
@@ -80,7 +80,7 @@ namespace ufl_cap4053::searches{
 			std::fill_n(gScore,size,std::numeric_limits<int>::max());
 			gScore[startPos] = 0;
 
-			fScore = new int[stride*depth];
+			fScore = new int[static_cast<int64_t>(stride)* static_cast<int64_t>(depth)];
 			std::fill_n(fScore,size,std::numeric_limits<int>::max());
 			fScore[startPos] = heuristic(map[startPos].x,map[startPos].y,map[startPos].z);
 		}
@@ -117,7 +117,7 @@ namespace ufl_cap4053::searches{
 					}
 
 					
-					double tentativegScore = gScore[current] + map[neighbor].weight;
+					int tentativegScore = gScore[current] + map[neighbor].weight;
 					if(tentativegScore >= gScore[neighbor]){
 						continue;
 					}

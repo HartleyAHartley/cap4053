@@ -12,17 +12,17 @@
 #include "../Framework/TileSystem/Tile.h"
 
 namespace ufl_cap4053::searches{
-	class DLLEXPORT PathSearch {
+	class  PathSearch {
 	public:
-		 PathSearch();
-		~PathSearch();
-		auto load(TileMap* _tileMap) -> void;
-		auto initialize(int startRow, int startCol, int goalRow, int goalCol) -> void;
-		auto update(long timeslice) -> void;
-		auto shutdown() -> void;
-		auto unload() -> void;
-		auto isDone() const -> bool;
-		auto getSolution() const -> std::vector<Tile const*> const;
+		DLLEXPORT PathSearch();
+		DLLEXPORT ~PathSearch();
+		DLLEXPORT auto load(TileMap* _tileMap) -> void;
+		DLLEXPORT auto initialize(int startRow, int startCol, int goalRow, int goalCol) -> void;
+		DLLEXPORT auto update(long timeslice) -> void;
+		DLLEXPORT auto shutdown() -> void;
+		DLLEXPORT auto unload() -> void;
+		DLLEXPORT auto isDone() const -> bool;
+		DLLEXPORT auto getSolution() const -> std::vector<Tile const*> const;
 
 	private:
 		struct vertex{
