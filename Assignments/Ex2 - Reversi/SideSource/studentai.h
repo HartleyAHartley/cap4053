@@ -14,8 +14,6 @@ namespace GameAI::GamePlaying
 
       int Minimax(int _color, const Core::Board& _board, int _lookAheadDepth);
 
-      int OtherColor(int _color);
-
       int Evaluate(const Core::Board& board);
 
   };
