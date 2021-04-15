@@ -2,21 +2,13 @@
 using Robocode.Util;
 using System.Collections.Generic;
 using System;
-using System.Numerics;
+using System.Drawing;
 
 
 namespace CAP4053.Student
 {
 	public class MartyroftheHolyCowBot : TeamRobot
 	{
-		public override void OnHitByBullet(HitByBulletEvent e)
-		{
-		}
-
-		public override void OnStatus(StatusEvent e)
-		{
-		}
-
 		public override void OnRobotDeath(RobotDeathEvent e)
 		{
 			if(e.Name == target)
@@ -26,29 +18,13 @@ namespace CAP4053.Student
       }
 		}
 
-		public override void OnHitWall(HitWallEvent e)
-		{
-		}
-
-		public override void OnBulletHitBullet(BulletHitBulletEvent e)
-		{
-		}
-
-		public override void OnBulletHit(BulletHitEvent e)
-		{
-		}
-
-		public override void OnHitRobot(HitRobotEvent e)
-		{
-		}
-
-		public override void OnBulletMissed(BulletMissedEvent e)
-		{
-		}
-
 		public override void OnScannedRobot(ScannedRobotEvent e)
 		{
 			var s = new Scanned(e,Time);
+      if (IsTeammate(e.Name))
+      {
+				return;
+      }
 			if (target == "")
 			{
 				target = s.Name;
@@ -62,7 +38,7 @@ namespace CAP4053.Student
       {
 				opponents[s.Name] = s;
 			}
-			
+
 			var radarAngle = Utils.NormalRelativeAngle(HeadingRadians + s.BearingRadians - RadarHeadingRadians);
 			var gunAngle = Utils.NormalRelativeAngle(HeadingRadians + s.BearingRadians - GunHeadingRadians + (s.Velocity*Math.Sin(s.HeadingRadians-(HeadingRadians + s.BearingRadians))/ Rules.GetBulletSpeed(3) ));
 			var offset = Math.PI / 2;
@@ -73,7 +49,7 @@ namespace CAP4053.Student
 				SetTurnLeftRadians(moveAngle);
 				SetAhead(double.PositiveInfinity * direction);
 				direction *= -1;
-			}else if (Energy > 40)
+			}else if (Energy > 20)
 			{
 				SetTurnLeftRadians(moveAngle);
 				SetAhead(double.PositiveInfinity * direction);
@@ -97,6 +73,11 @@ namespace CAP4053.Student
 			IsAdjustRadarForGunTurn = true;
 			IsAdjustRadarForRobotTurn = true;
 			IsAdjustGunForRobotTurn = true;
+			BodyColor = Color.AliceBlue;
+			BulletColor = Color.FromArgb(128, 128, 128);
+			RadarColor = Color.DarkOrchid;
+			ScanColor = Color.DarkOrchid;
+
 			target = "";
 			SetTurnRadarLeftRadians(double.PositiveInfinity);
 
@@ -105,15 +86,6 @@ namespace CAP4053.Student
 				Scan();
 				Execute();
 			}
-		}
-
-
-		public override void OnCustomEvent(CustomEvent e)
-		{
-		}
-
-		public override void OnMessageReceived(MessageEvent evnt)
-		{
 		}
 
 		private double direction;

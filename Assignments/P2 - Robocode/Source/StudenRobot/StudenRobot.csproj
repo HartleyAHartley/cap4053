@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>CAP4053.Student</RootNamespace>
-    <AssemblyName>MyTeam</AssemblyName>
+    <AssemblyName>PoppinRobo</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
