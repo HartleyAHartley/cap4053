@@ -18,7 +18,7 @@ namespace CAP4053.Student
 		private double bulletPower = 3;
 		private State currState = State.Searching;
 		private long lastReverse = 0;
-		private const long reverseCooldown = 1;
+		private const long reverseCooldown = 15;
 
 		private enum State
 		{
@@ -114,11 +114,12 @@ namespace CAP4053.Student
 
 		private void movement()
 		{
-			if (energyDrop > 0)
+			if (energyDrop > 0 && (Time - lastReverse) > reverseCooldown)
 			{
 				SetTurnLeftRadians(moveAngle);
 				SetAhead(double.PositiveInfinity * direction);
 				direction *= -1;
+				lastReverse = Time;
 			}
 			else if (Energy > 20)
 			{
@@ -179,11 +180,17 @@ namespace CAP4053.Student
 			if (currState == State.Searching)
 			{
 				currState = State.Found;
-				opponents[s.Name] = s;
 				target = s.Name;
 			}
-
-			prevEnergies[target] = opponents[s.Name].Energy;
+      if (opponents.ContainsKey(s.Name))
+      {
+				prevEnergies[s.Name] = opponents[s.Name].Energy;
+      }
+      else
+      {
+				prevEnergies[s.Name] = 0;
+      }
+			
 			opponents[s.Name] = s;
 
 			movement();
@@ -191,6 +198,24 @@ namespace CAP4053.Student
 			aim();
 
 		}
+
+		public override void OnMessageReceived(MessageEvent e)
+		{
+			if (!(e.Message is string))
+			{
+				return;
+			}
+			if ((string)e.Message != "FIRED")
+			{
+				return;
+			}
+			if ((Time - lastReverse) > reverseCooldown)
+			{
+				direction *= -1;
+				lastReverse = Time;
+			}
+		}
+
 
 		public override void Run()
 		{
