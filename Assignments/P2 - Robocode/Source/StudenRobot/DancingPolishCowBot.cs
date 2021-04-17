@@ -289,7 +289,7 @@ namespace CAP4053.Student
 
     public override void OnMessageReceived(MessageEvent evnt)
     {
-      if ((string)evnt.Message == "FIRED" && Time - dataState.lastFiredMessage > 30)
+      if ((string)evnt.Message == "FIRED" && Time - dataState.lastFiredMessage > 15)
       {
         dataState.movingDir *= -1;
         dataState.lastFiredMessage = Time;
